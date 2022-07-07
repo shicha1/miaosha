@@ -41,7 +41,7 @@ public class UserController extends BaseController{
     @Autowired  //通过bean做注入
     private UserService userService;
 
-    @Autowired
+    @Resource
     private HttpServletRequest httpServletRequest;
 
     @Autowired

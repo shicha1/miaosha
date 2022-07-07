@@ -16,6 +16,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.concurrent.Executor;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class OrderController extends BaseController {
     @Autowired
     private ItemService itemService;
 
-    @Autowired
+    @Resource
     private HttpServletRequest httpServletRequest;
 
     @Autowired
@@ -137,9 +138,9 @@ public class OrderController extends BaseController {
             public Object call() throws Exception {
                 //加入库存流水init状态
                 String stockLogId = itemService.initStockLog(itemId,amount);
-                //再去完成对应的下单事务型消息机制
+                //再去完成对应的下单事务型消息机制，在这里面执行了createOrder的方法
                 if(!mqProducer.transactionAsyncReduceStock(userModel.getId(),itemId,promoId,amount,stockLogId)){
-                    throw new BusinessException(EmBusinessError.UNKONW_ERROR,"下单失败");
+                    throw new BusinessException(EmBusinessError.UNKNOW_ERROR,"下单失败");
                 }
                 return null;
             }
@@ -147,9 +148,9 @@ public class OrderController extends BaseController {
         try {
             future.get();
         } catch (InterruptedException e) {
-            throw new BusinessException(EmBusinessError.UNKONW_ERROR);
+            throw new BusinessException(EmBusinessError.UNKNOW_ERROR);
         } catch (ExecutionException e) {
-            throw new BusinessException(EmBusinessError.UNKONW_ERROR);
+            throw new BusinessException(EmBusinessError.UNKNOW_ERROR);
         }
 
 

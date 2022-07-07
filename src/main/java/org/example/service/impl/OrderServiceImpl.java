@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -36,16 +37,16 @@ public class OrderServiceImpl implements OrderService {
 //    @Autowired
 //    private ItemModel itemModel;
 
-    @Autowired
+    @Resource
     private UserService userService;
 
-    @Autowired
+    @Resource
     private OrderDOMapper orderDOMapper;
 
-    @Autowired
+    @Resource
     private SequenceDOMapper sequenceDOMapper;
 
-    @Autowired
+    @Resource
     private StockLogDOMapper stockLogDOMapper;
 
     @Override
@@ -110,7 +111,7 @@ public class OrderServiceImpl implements OrderService {
         //设置库存流水状态为成功
         StockLogDO stockLogDO = stockLogDOMapper.selectByPrimaryKey(stockLogId);
         if(stockLogDO == null){
-            throw new BusinessException(EmBusinessError.UNKONW_ERROR);
+            throw new BusinessException(EmBusinessError.UNKNOW_ERROR);
         }
         stockLogDO.setStatus(2);
         stockLogDOMapper.updateByPrimaryKeySelective(stockLogDO);
@@ -118,7 +119,7 @@ public class OrderServiceImpl implements OrderService {
 //        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 //            @Override
 //            public void afterCommit(){
-//                //异步更新库存
+//                //异步更新库存,
 //                boolean mqResult = itemService.asyncDecreaseStock(itemId,amount);
 ////                    if(!mqResult){
 ////                        itemService.increaseStock(itemId,amount);

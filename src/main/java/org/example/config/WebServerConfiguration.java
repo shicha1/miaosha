@@ -10,6 +10,10 @@ import org.springframework.boot.web.server.ConfigurableWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
 @Component
 public class WebServerConfiguration implements WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
     @Override
@@ -18,7 +22,7 @@ public class WebServerConfiguration implements WebServerFactoryCustomizer<Config
             @Override
             public void customize(Connector connector) {
                 Http11NioProtocol protocol= (Http11NioProtocol) connector.getProtocolHandler();
-                //定制化keepalivetimeout
+                //定制化keepalivetimeout,30秒没有请求则自动断开keepalive连接
                 protocol.setKeepAliveTimeout(30000);
                 //当客户端发送超过10000个请求则自动断开keepalive连接
                 protocol.setMaxKeepAliveRequests(10000);

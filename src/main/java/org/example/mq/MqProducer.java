@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class MqProducer {
     @Autowired
     private OrderService orderService;
 
-    @Autowired
+    @Resource
     private StockLogDOMapper stockLogDOMapper;
 
     /***
@@ -90,11 +91,11 @@ public class MqProducer {
                 Integer amount = (Integer) map.get("amount");
                 String stockLogId = (String) map.get("stockLogId");
                 StockLogDO stockLogDO = stockLogDOMapper.selectByPrimaryKey(stockLogId);
-                if(stockLogDO == null){
+                if(stockLogDO == null){ //这个情况不太可能出现
                     return LocalTransactionState.UNKNOW;
                 }
                 if(stockLogDO.getStatus().intValue() == 2){
-                    return LocalTransactionState.COMMIT_MESSAGE;
+                    return LocalTransactionState.COMMIT_MESSAGE;//然后才可以去让消费端消费，真正的去扣减库存
                 }else if(stockLogDO.getStatus().intValue() == 1){
                     return LocalTransactionState.UNKNOW;
                 }
@@ -128,9 +129,10 @@ public class MqProducer {
         Message message = new Message(topicName,"increase",
                 JSON.toJSON(bodyMap).toString().getBytes(Charset.forName("UTF-8")));
         TransactionSendResult sendResult = null;
-        try {
+        try {//发送的是事务型消息，二阶段提交，消息发送成功以后不能立即被消费，只是进入了prepare状态，
             sendResult = transactionMQProducer.sendMessageInTransaction(message,argsMap);
         } catch (MQClientException e) {
+            //在控制台上打印Throwable对象封装的异常信息
             e.printStackTrace();
             return false;
         }
