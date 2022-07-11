@@ -49,7 +49,7 @@ public class MqProducer {
      * 初始化RocketMq生产者配置
      * @throws MQClientException
      */
-    @PostConstruct
+    @PostConstruct  //程序启动的时候就会执行
     public void init() throws MQClientException {
         //做mq producer的初始化
         producer = new DefaultMQProducer("producer_group");
@@ -61,7 +61,7 @@ public class MqProducer {
         transactionMQProducer.start();
 
         transactionMQProducer.setTransactionListener(new TransactionListener() {
-            @Override
+            @Override //执行本地事务
             public LocalTransactionState executeLocalTransaction(Message msg, Object arg) {
                 //真正要做的事  创建订单
                 Integer itemId = (Integer) ((Map)arg).get("itemId");
@@ -82,7 +82,7 @@ public class MqProducer {
                 return LocalTransactionState.COMMIT_MESSAGE;
             }
 
-            @Override
+            @Override  //检查本地事务
             public LocalTransactionState checkLocalTransaction(MessageExt msg) {
                 //根据是否扣减库存成功，来判断要返回COMMIT,ROLLBACK还是继续UNKNOWN
                 String jsonString  = new String(msg.getBody());
@@ -129,7 +129,8 @@ public class MqProducer {
         Message message = new Message(topicName,"increase",
                 JSON.toJSON(bodyMap).toString().getBytes(Charset.forName("UTF-8")));
         TransactionSendResult sendResult = null;
-        try {//发送的是事务型消息，二阶段提交，消息发送成功以后不能立即被消费，只是进入了prepare状态，
+        try {//这里会先执行上面的executeLocalTransaction，发送的是事务型消息，
+            // 二阶段提交，这里只是发送半消息，消息发送成功以后不能立即被消费，只是进入了prepare状态，
             sendResult = transactionMQProducer.sendMessageInTransaction(message,argsMap);
         } catch (MQClientException e) {
             //在控制台上打印Throwable对象封装的异常信息

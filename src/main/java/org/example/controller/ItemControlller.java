@@ -116,7 +116,7 @@ public class ItemControlller extends BaseController {
                 //设置itemModel到redis内
                 redisTemplate.opsForValue().set("item_"+id,itemModel);
                 //设置缓存失效时间
-                redisTemplate.expire("item_"+id,10, TimeUnit.MINUTES);
+                redisTemplate.expire("item_"+id,1, TimeUnit.MINUTES);
             }
             //填充本地缓存
             cacheService.setCommonCache("item_"+id,itemModel);

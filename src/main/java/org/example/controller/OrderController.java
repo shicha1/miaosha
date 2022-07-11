@@ -54,8 +54,8 @@ public class OrderController extends BaseController {
      */
     @PostConstruct
     public void init(){
-        executorService = Executors.newFixedThreadPool(20);
-        orderCreateRateLimiter = RateLimiter.create(300);
+        executorService = Executors.newFixedThreadPool(2000);
+        orderCreateRateLimiter = RateLimiter.create(30000);
     }
 
     //生成秒杀令牌
@@ -82,9 +82,8 @@ public class OrderController extends BaseController {
         return CommonReturnType.create((promoToken));
     }
 
-
     @RequestMapping(value = "/createOrder",method = {RequestMethod.POST},consumes = {CONTENT_TYPE_FORMED})
-    @ResponseBody     //这里刚开始名字取错了，写出createItem了，后来又改的，不知道有没有影响。
+    @ResponseBody
     public CommonReturnType createOrder(@RequestParam(name = "itemId")Integer itemId,
                                @RequestParam(name = "amount")Integer amount,
                                @RequestParam(name = "promoId",required = false)Integer promoId,
